@@ -16,6 +16,7 @@ namespace cg
     public:
         class Vertex2: public DCoordinate2
         {
+            Vertex2(GLdouble x, GLdouble y) { _data[0] = x; _data[1] = y; }
             // other public/protected/private attributes/methods/operators
         public:
             // for lexicographical ordering
@@ -60,5 +61,7 @@ namespace cg
 
         // destructor
         virtual ~PointCloud2();
+
+        float angle(const DCoordinate2 &a, const DCoordinate2 &b, const DCoordinate2 &c) const;
     };
 }

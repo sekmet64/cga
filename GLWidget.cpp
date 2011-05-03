@@ -3,15 +3,17 @@
 #include <fstream>
 #include "MainWindow.h"
 #include "Core/Polygons2.h"
+#include <QFileDialog>
 
 using namespace cg;
+using namespace std;
 
 //--------------------------------
 // special and default constructor
 //--------------------------------
 GLWidget::GLWidget(QWidget *parent): QGLWidget(QGLFormat(
         QGL::Rgba | QGL::DepthBuffer | QGL::DoubleBuffer),
-        parent)
+        parent), _polygon(0)
 {
 
 }
@@ -54,46 +56,13 @@ void GLWidget::initializeGL()
     _angle_x = _angle_y = _angle_z = 0.0;
     _trans_x = _trans_y = _trans_z = 0.0;
 
-//    _vertex_count = 10000;
-//    for (int i = 0; i < _vertex_count; ++i)
-//    {
-//        _x.push_back(-1.0 + 2.0 *  rand() / RAND_MAX);
-//        _y.push_back(-1.0 + 2.0 *  rand() / RAND_MAX);
-//        _z.push_back(-1.0 + 2.0 *  rand() / RAND_MAX);
-//        _r.push_back( (float) rand() / RAND_MAX);
-//        _g.push_back( (float) rand() / RAND_MAX);
-//        _b.push_back( (float) rand() / RAND_MAX);
-//    }
-
-//    _dl_triangles = 0;
-
-//    _dl_triangles = glGenLists(1);
-
-//    if (!_dl_triangles)
-//    {
-//        // error
-//    }
-
-//    glNewList(_dl_triangles, GL_COMPILE);
-//        glBegin(GL_LINES);
-//            for (int i=0; i < _vertex_count; ++i) {
-//                glColor3f(_r[i], _g[i], _b[i]);
-//                glVertex3f(_x[i], _y[i], _z[i]);
-//            }
-//        glEnd();
-//    glEndList();
-
-
-
     glewInit();
-    _polygon.UpdateVertexBufferObject(GL_STATIC_DRAW);
 }
 
 
 GLWidget::~GLWidget()
 {
-if (_dl_triangles)
-    glDeleteLists(_dl_triangles, 1);
+
 }
 
 //-----------------------
@@ -116,30 +85,12 @@ void GLWidget::paintGL()
 
         glScaled(_zoom, _zoom, _zoom);
 
-//        // render something
-//        glBegin(GL_TRIANGLES);
-//            glColor3f(1.0, 0.0, 0.0);
-//            glVertex3f(1.0, 0.0, 0.0);
+        _point_cloud.RenderPoints();
 
-//            glColor3f(0.0, 1.0, 0.0);
-//            glVertex3f(0.0, 1.0, 0.0);
-
-//            glColor3f(0.0, 0.0, 1.0);
-//            glVertex3f(0.0, 0.0, 1.0);
-//        glEnd();
-
-//        glBegin(GL_TRIANGLES);
-//            for (int i=0; i < _vertex_count; ++i) {
-//                glColor3f(_r[i], _g[i], _b[i]);
-//                glVertex3f(_x[i], _y[i], _z[i]);
-//            }
-//        glEnd();
-
-//        if (_dl_triangles)
-//        {
-//            glCallList(_dl_triangles);
-//        }
-        _polygon.Render();
+        if (_polygon != 0)
+        {
+            _polygon->Render();
+        }
 
     // pops the current matrix stack, replacing the current matrix with the one below it on the stack,
     // i.e., the original model view matrix is restored
@@ -235,4 +186,21 @@ void GLWidget::set_trans_z(double value)
         _trans_z = value;
         updateGL();
     }
+}
+
+void GLWidget::loadPointCloud()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+        "Load point cloud", "", "Point cloud files (*.txt)");
+
+    ifstream ifs(filename.toAscii().constData());
+    ifs >> _point_cloud;
+    repaint();
+}
+
+void GLWidget::slowConvexHull()
+{
+    _polygon = _point_cloud.SlowConvexHull_DirectedExtremeEdges();
+    _polygon->UpdateVertexBufferObject();
+    repaint();
 }

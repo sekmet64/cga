@@ -52,6 +52,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent)
     connect(_side_widget->trans_y_spin_box, SIGNAL(valueChanged(double)), _gl_widget, SLOT(set_trans_y(double)));
     connect(_side_widget->trans_z_spin_box, SIGNAL(valueChanged(double)), _gl_widget, SLOT(set_trans_z(double)));
 
+    connect(_side_widget->loadButton, SIGNAL(clicked()), _gl_widget, SLOT(loadPointCloud()));
+    connect(_side_widget->slowButton, SIGNAL(clicked()), _gl_widget, SLOT(slowConvexHull()));
 }
 
 //--------------------------------

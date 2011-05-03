@@ -217,6 +217,45 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>220</y>
+     <width>251</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Point clouds</string>
+   </property>
+   <widget class="QPushButton" name="loadButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Load file...</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="slowButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>111</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Slow convex hull</string>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <resources/>
  <connections/>

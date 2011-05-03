@@ -1,12 +1,14 @@
 #include "PointClouds2.h"
+#include <algorithm>
+#include <cmath>
 
 using namespace cg;
 using namespace std;
 
 ostream& cg::operator <<(ostream& lhs, const PointCloud2& rhs)
 {
-    lhs << "??" << endl;
-    lhs << rhs._points.size();
+    lhs << rhs._usage_flag << endl;
+    lhs << rhs._points.size() << endl;
     for (PointCloud2::const_vertex_iterator it = rhs._points.begin();
         it != rhs._points.end(); ++it)
     {
@@ -17,16 +19,23 @@ ostream& cg::operator <<(ostream& lhs, const PointCloud2& rhs)
 
 istream& cg::operator >>(istream& lhs, PointCloud2& rhs)
 {
+    // cleanup
+    rhs.DeleteVertexBufferObjectOfPoints();
+    rhs._points.clear();
+
     int n;
-    lhs >> n;//??
+    lhs >> rhs._usage_flag;
     lhs >> n;
     rhs._points.reserve(n);
+
     for (int i = 0; i < n; i++)
     {
         PointCloud2::Vertex2 v;
         lhs >> v;
         rhs._points.push_back(v);
     }
+
+    rhs.UpdateVertexBufferObjectOfPoints();
     return lhs;
 }
 
@@ -137,34 +146,46 @@ PointCloud2::Vertex2& PointCloud2::operator[](GLuint index)
 Polygon2* PointCloud2::SlowConvexHull_DirectedExtremeEdges(
         GLenum usage_flag_of_convex_hull) const
 {
-    bool valid;
     Polygon2* convex_hull = new Polygon2(usage_flag_of_convex_hull);
 
-    for (unsigned p = 0; p < _points.size(); p++)
+    unsigned i0;
+    for (unsigned i = 1; i < _points.size(); ++i)
+        if (_points[i].y() < _points[i0].y())
+            i0 = i;
+
+    unsigned i = i0;
+    convex_hull->push_back(_points[i].x(), _points[i].y());
+    int k;
+    float alpha;
+    double lowest;
+    Vertex2 prev(_points[i][0], _points[i][1] - 1);
+    do
     {
-        for (unsigned q = 0; q < _points.size(); q++)
+        lowest = 360.0;
+        for (unsigned j = 0; j < _points.size(); ++j)
         {
-            if (p != q)
+            if (j != i)
             {
-                valid = true;
-                for (unsigned r = 0; r < _points.size(); r++)
+                DCoordinate2 a = static_cast<DCoordinate2>(prev);
+                DCoordinate2 b = static_cast<DCoordinate2>(_points[i]);
+                DCoordinate2 c = static_cast<DCoordinate2>(_points[j]);
+                alpha = angle(a, b, c);
+
+                if (alpha < lowest)
                 {
-                    if (r != p && r != q)
-                    {
-                        if ((_points[q].x() - _points[p].x()) * (_points[r].y() -
-                            _points[p].y()) - (_points[q].y() - _points[p].y()) *
-                            (_points[r].x() - _points[p].x()))
-                            valid = false;
-                    }
-                }
-                if (valid)
-                {
-                    convex_hull->push_back(_points[p].x(), _points[p].y());
-                    convex_hull->push_back(_points[q].x(), _points[q].y());
+                    lowest = alpha;
+                    k = j;
                 }
             }
         }
-    }
+
+        prev = _points[i];
+        convex_hull->push_back(_points[k].x(), _points[k].y());
+        i = k;
+
+    } while (i == i0);
+
+
     return convex_hull;
 }
 
@@ -182,4 +203,35 @@ Polygon2* PointCloud2::FastConvexHull(GLboolean sort_points_in_place, GLenum usa
 PointCloud2::~PointCloud2()
 {
     DeleteVertexBufferObjectOfPoints();
+}
+
+float PointCloud2::angle(const DCoordinate2 &a, const DCoordinate2 &b, const DCoordinate2 &c) const
+{
+    DCoordinate2 ab = a - b;
+    DCoordinate2 cb = b - c;
+
+    float dot = ab * cb;
+
+    float ab_sqr = ab * ab;
+    float cb_sqr = cb * cb;
+
+    float cos_sqr = dot * dot / ab_sqr / cb_sqr;
+
+    float cos2 = 2 * cos_sqr - 1;
+
+    const float pi = 3.141592f;
+
+    float alpha2 = (cos2 < -1) ? pi : (cos2 >= 1) ? 0 : acosf(cos2);
+
+    float rslt = alpha2 / 2;
+    float rs = rslt * 180 / pi;
+
+    if (dot < 0)
+        rs = 180 - rs;
+
+    float det = ab ^ cb;
+    if (det < 0)
+        rs = -rs;
+
+    return rs;
 }

@@ -4,14 +4,13 @@
 #include <QGLWidget>
 #include <QGLFormat>
 #include <vector>
+#include "Core/PointClouds2.h"
 
 class GLWidget: public QGLWidget
 {
     Q_OBJECT
 
 private:
-    // specifies the properties of the rendering window
-    QGLFormat   _format;
 
     // variables defining the projection matrix
     float       _aspect;            // aspect ratio of the rendering window
@@ -26,12 +25,8 @@ private:
     double      _zoom;
     double      _trans_x, _trans_y, _trans_z;
 
-    std::vector<float> _x, _y, _z, _r, _g, _b;
-    unsigned _vertex_count;
-    unsigned int _dl_triangles;
-    cg::Polygon2    _polygon;
-
-
+    cg::PointCloud2 _point_cloud;
+    cg::Polygon2*   _polygon;
 public:
     // special and default constructor
     GLWidget(QWidget* parent = 0);
@@ -52,4 +47,7 @@ public slots:
     void set_trans_x(double value);
     void set_trans_y(double value);
     void set_trans_z(double value);
+
+    void loadPointCloud();
+    void slowConvexHull();
 };
