@@ -61,8 +61,3 @@ void MainWindow::on_action_Quit_triggered()
 {
     qApp->exit(0);
 }
-
-void MainWindow::setArea(QString text)
-{
-    _side_widget->areaLineEdit->setText(text);
-}

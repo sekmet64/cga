@@ -13,30 +13,7 @@ GLWidget::GLWidget(QWidget *parent): QGLWidget(QGLFormat(
         QGL::Rgba | QGL::DepthBuffer | QGL::DoubleBuffer),
         parent)
 {
-//    // read poly from file
-//    std::ifstream input;
-//    input.open("poly.txt");
-//    input >> _polygon;
-//    input.close();
-    _vertex_count = 10000;
-    GLdouble alpha = 0.0;
 
-    GLdouble delta = 6.2831 / _vertex_count;
-    GLdouble radius = 1.0;
-
-    Polygon2::vertex_iterator it = _polygon[0];
-    Polygon2::Vertex2 v;
-    for (GLuint i = 0; i < _vertex_count; ++i)
-    {
-        v[0] = radius * cos(alpha);
-        v[1] = radius + sin(alpha);
-        it = _polygon.InsertVertex(it, v);
-        alpha += delta;
-    }
-
-
-
-    ((MainWindow*)parent)->setArea(QString::number(_polygon.CalculateSignedArea()));
 }
 
 //--------------------------------------------------------------------------------------
