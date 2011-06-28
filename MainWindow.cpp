@@ -54,6 +54,22 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent)
 
     connect(_side_widget->loadButton, SIGNAL(clicked()), _gl_widget, SLOT(loadPointCloud()));
     connect(_side_widget->slowButton, SIGNAL(clicked()), _gl_widget, SLOT(slowConvexHull()));
+
+    connect(_side_widget->quick_hull_button, SIGNAL(clicked()), _gl_widget, SLOT(quick_hull()));
+    connect(_side_widget->fast_hull_button, SIGNAL(clicked()), _gl_widget,
+            SLOT(fast_hull()));
+
+    connect(_side_widget->load_model_button, SIGNAL(clicked()), _gl_widget,
+            SLOT(load_model()));
+
+    connect(_gl_widget, SIGNAL(show_volume(double)), this, SLOT(show_volume(double)));
+
+    connect(_side_widget->load_polygon, SIGNAL(clicked()), _gl_widget, SLOT(load_polygon()));
+
+    connect(_side_widget->load_3d_button, SIGNAL(clicked()), _gl_widget, SLOT(load_3d()));
+    connect(_side_widget->convex_3d_button, SIGNAL(clicked()), _gl_widget, SLOT(convex_3d()));
+
+    connect(_side_widget->step_button, SIGNAL(clicked()), _gl_widget, SLOT(step_convex()));
 }
 
 //--------------------------------
@@ -62,4 +78,9 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent)
 void MainWindow::on_action_Quit_triggered()
 {
     qApp->exit(0);
+}
+
+void MainWindow::show_volume(double value)
+{
+    statusBar()->showMessage("Model volume: " + QString::number(value));
 }

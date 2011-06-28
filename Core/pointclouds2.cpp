@@ -142,13 +142,18 @@ PointCloud2::Vertex2& PointCloud2::operator[](GLuint index)
     return _points[index];
 }
 
+void PointCloud2::Clear()
+{
+    _points.clear();
+}
+
 // generate convex hull by means of naive and realistic algorithms
 Polygon2* PointCloud2::SlowConvexHull_DirectedExtremeEdges(
         GLenum usage_flag_of_convex_hull) const
 {
     Polygon2* convex_hull = new Polygon2(usage_flag_of_convex_hull);
 
-    unsigned i0;
+    unsigned i0 = 0;
     for (unsigned i = 1; i < _points.size(); ++i)
         if (_points[i].y() < _points[i0].y())
             i0 = i;
@@ -183,7 +188,7 @@ Polygon2* PointCloud2::SlowConvexHull_DirectedExtremeEdges(
         convex_hull->push_back(_points[k].x(), _points[k].y());
         i = k;
 
-    } while (i == i0);
+    } while (i != i0);
 
 
     return convex_hull;
@@ -191,12 +196,192 @@ Polygon2* PointCloud2::SlowConvexHull_DirectedExtremeEdges(
 
 Polygon2* PointCloud2::QuickHull(GLenum usage_flag_of_convex_hull) const
 {
-    return 0;
+    Polygon2 *quick_hull = new Polygon2(usage_flag_of_convex_hull);
+
+    const Vertex2 *left_point = &_points[0];
+    int ti = 0;
+
+    for (unsigned i = 1; i < _points.size(); i++)
+    {
+        if (_points[i].x() > left_point->x())
+        {
+            left_point = &_points[i];
+            ti = i;
+        }
+    }
+
+    const Vertex2 *right_point = &_points[0];
+    int tj = 0;
+
+    for (unsigned i = 1; i < _points.size(); i++)
+    {
+        if (_points[i].x() < right_point->x())
+        {
+            right_point = &_points[i];
+            tj = i;
+        }
+    }
+
+    vector<Vertex2> hull;
+    hull.push_back(_points[ti]);
+
+    vector<Vertex2> hulla = QuickHull(_points[ti], _points[tj], _points);
+
+    hull.insert(hull.end(), hulla.begin(), hulla.end());
+
+    hull.push_back(_points[tj]);
+
+    vector<Vertex2> hullb = QuickHull(_points[tj], _points[ti], _points);
+
+    hull.insert(hull.end(), hullb.begin(), hullb.end());
+
+    for (vector<Vertex2>::iterator it = hull.begin(); it != hull.end(); it++)
+    {
+        quick_hull->push_back((*it).x(), (*it).y());
+    }
+
+    return quick_hull;
+}
+
+
+vector<PointCloud2::Vertex2> PointCloud2::QuickHull(Vertex2 i, Vertex2 j, vector<Vertex2> points) const
+{
+    if (points.size() == 0)
+    {
+        vector<Vertex2> empty_vector;
+        return empty_vector;
+    }
+    else
+    {
+        int k = MaxDistance(i, j, points);
+
+        vector<Vertex2> a = RightOf(i, points[k], points);
+
+        vector<Vertex2> b = RightOf(points[k], j, points);
+
+        vector<Vertex2> result_a = QuickHull(i, points[k], a);
+        vector<Vertex2> result_b = QuickHull(points[k], j, b);
+
+
+        result_a.push_back(points[k]);
+        result_a.insert(result_a.end(), result_b.begin(), result_b.end());
+        return result_a;
+    }
+}
+
+int PointCloud2::MaxDistance(Vertex2 iv, Vertex2 jv, vector<Vertex2> &points) const
+{
+    double max_distance = 0;
+
+    int max_k = 0;
+
+    for (unsigned k = 1; k < points.size(); k++)
+    {
+
+        if (points[k] != iv && points[k] != jv)
+        {
+            double L = sqrt( pow(jv.x() - iv.x(), 2) + pow(jv.y() - iv.y(), 2));
+            double s = ((iv.y() - points[k].y()) * (jv.x() - iv.x()) -
+                    (iv.x() - points[k].x()) * (jv.y() - iv.y())) / (L * L);
+
+            if (s > 0)
+            {
+                double distance = fabs(s) * L;
+
+                if (max_distance < distance)
+                {
+                    max_distance = distance;
+                    max_k = k;
+                }
+            }
+        }
+    }
+    return max_k;
+}
+
+vector<PointCloud2::Vertex2> PointCloud2::RightOf(Vertex2 iv, Vertex2 jv,
+    vector<Vertex2> &points) const
+{
+    vector<Vertex2> right_points;
+
+    for (unsigned k = 0; k < points.size(); k++)
+    {
+        if (points[k] != iv && points[k] != jv)
+        {
+            double L = sqrt( pow(jv.x() - iv.x(), 2) + pow(jv.y() - iv.y(), 2));
+            double s = ((iv.y() - points[k].y()) * (jv.x() - iv.x()) -
+                    (iv.x() - points[k].x()) * (jv.y() - iv.y())) / (L * L);
+
+            if (s > 0)
+            {
+                right_points.push_back(points[k]);
+            }
+        }
+    }
+
+    return right_points;
 }
 
 Polygon2* PointCloud2::FastConvexHull(GLboolean sort_points_in_place, GLenum usage_flag_of_convex_hull)
 {
-    return 0;
+    sort(_points.begin(), _points.end());
+    list<Vertex2> upper;
+    upper.push_back(_points[0]);
+    upper.push_back(_points[1]);
+
+    for (unsigned i = 2; i < _points.size(); i++)
+    {
+        upper.push_back(_points[i]);
+        while (upper.size() > 2 && !RightTurn(last(upper, 2), last(upper, 1),
+                                              upper.back()))
+        {
+            list<Vertex2>::iterator it = upper.end();
+            advance(it, -2);
+            upper.erase(it);
+        }
+
+    }
+    list<Vertex2> lower;
+    lower.push_back(_points[_points.size()-1]);
+    lower.push_back(_points[_points.size()-2]);
+
+    for (int i = _points.size() - 3; i >= 0; i--)
+    {
+        lower.push_back(_points[i]);
+        while (lower.size() > 2 && !RightTurn(last(lower, 2), last(lower, 1),
+                                              lower.back()))
+        {
+            list<Vertex2>::iterator it = lower.end();
+            advance(it, -2);
+            lower.erase(it);
+        }
+    }
+    lower.erase(lower.begin());
+    lower.erase(--lower.end());
+
+    Polygon2 *result = new Polygon2(usage_flag_of_convex_hull);
+    for (list<Vertex2>::iterator it = lower.begin(); it != lower.end(); it++)
+    {
+        result->push_back((*it).x(), (*it).y());
+    }
+    for (list<Vertex2>::iterator it = upper.begin(); it != upper.end(); it++)
+    {
+        result->push_back((*it).x(), (*it).y());
+    }
+    return result;
+
+}
+
+PointCloud2::Vertex2 PointCloud2::last(list<Vertex2> &vlist, int count)
+{
+    list<Vertex2>::reverse_iterator it = vlist.rbegin();
+    advance(it, count);
+    return *it;
+}
+
+bool PointCloud2::RightTurn(Vertex2 a, Vertex2 b, Vertex2 c)
+{
+    return (b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x()) > 0;
 }
 
 // destructor

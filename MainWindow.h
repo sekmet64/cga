@@ -23,7 +23,8 @@ public:
     // special and default constructor
     MainWindow(QWidget *parent = 0);
     void setArea(QString text);
-
+public slots:
+    void show_volume(double value);
 private slots:
     // private event handling methods/slots
     void on_action_Quit_triggered();

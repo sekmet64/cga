@@ -5,6 +5,9 @@
 #include <QGLFormat>
 #include <vector>
 #include "Core/PointClouds2.h"
+#include "Core/TriangulatedMeshes3.h"
+#include "Core/Lights.h"
+#include "Core/PointCloud3.h"
 
 class GLWidget: public QGLWidget
 {
@@ -25,8 +28,21 @@ private:
     double      _zoom;
     double      _trans_x, _trans_y, _trans_z;
 
+    bool    _show_point_cloud;
     cg::PointCloud2 _point_cloud;
     cg::Polygon2*   _polygon;
+
+
+    bool    _show_model;
+    cg::TriangulatedMesh3 *_mesh;
+    cg::DirectionalLight   *_dl;
+
+    bool _show_polygon;
+    cg::Polygon2 *_polygon_2;
+
+    bool _show_convex_hull;
+    cg::PointCloud3 *_point_cloud_3;
+
 public:
     // special and default constructor
     GLWidget(QWidget* parent = 0);
@@ -35,6 +51,8 @@ public:
     void initializeGL();
     void paintGL();
     void resizeGL(int w, int h);
+signals:
+    void show_volume(double value);
 
 public slots:
     // public event handling methods/slots
@@ -50,4 +68,16 @@ public slots:
 
     void loadPointCloud();
     void slowConvexHull();
+    void quick_hull();
+    void fast_hull();
+
+
+    void load_model();
+
+    void load_polygon();
+
+    void load_3d();
+    void convex_3d();
+
+    void step_convex();
 };

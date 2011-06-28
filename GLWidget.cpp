@@ -4,6 +4,7 @@
 #include "MainWindow.h"
 #include "Core/Polygons2.h"
 #include <QFileDialog>
+#include "Core/Materials.h"
 
 using namespace cg;
 using namespace std;
@@ -13,7 +14,16 @@ using namespace std;
 //--------------------------------
 GLWidget::GLWidget(QWidget *parent): QGLWidget(QGLFormat(
         QGL::Rgba | QGL::DepthBuffer | QGL::DoubleBuffer),
-        parent), _polygon(0)
+        parent),
+    _show_point_cloud(true),
+    _polygon(0),
+    _show_model(false),
+    _mesh(0),
+    _show_polygon(false),
+    _polygon_2(0),
+    _show_convex_hull(false),
+    _point_cloud_3(0)
+
 {
 
 }
@@ -45,6 +55,8 @@ void GLWidget::initializeGL()
 
     gluLookAt(_eye[0], _eye[1], _eye[2], _center[0], _center[1], _center[2], _up[0], _up[1], _up[2]);
 
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
     // enabling depth test
     glEnable(GL_DEPTH_TEST);
 
@@ -57,6 +69,26 @@ void GLWidget::initializeGL()
     _trans_x = _trans_y = _trans_z = 0.0;
 
     glewInit();
+
+
+
+    _dl = new DirectionalLight(GL_LIGHT0, HCoordinate3(0.0,0.0,1.0,0.0),
+        Color4(0.4,0.4,0.4,1.0),
+        Color4(0.8,0.8,0.8,1.0),
+        Color4(1.0,1.0,1.0,1.0));
+
+
+
+
+
+//    glEnable(GL_POINT_SMOOTH);
+//    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+//    glEnable(GL_LINE_SMOOTH);
+//    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+//    glEnable(GL_POLYGON_SMOOTH);
+//    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+
+
 }
 
 
@@ -85,11 +117,38 @@ void GLWidget::paintGL()
 
         glScaled(_zoom, _zoom, _zoom);
 
-        _point_cloud.RenderPoints();
-
-        if (_polygon != 0)
+        if (_show_point_cloud)
         {
-            _polygon->Render();
+            _point_cloud.RenderPoints();
+
+            if (_polygon != 0)
+            {
+                _polygon->Render();
+            }
+        }
+
+        if (_show_model)
+        {
+            glEnable(GL_LIGHTING);
+            glEnable(GL_NORMALIZE);
+
+            MatFBEmerald.Apply();
+            _dl->Enable();
+            _mesh->Render();
+            _dl->Disable();
+
+            glDisable(GL_LIGHTING);
+            glDisable(GL_NORMALIZE);
+        }
+
+        if (_show_polygon)
+        {
+            _polygon_2->Render();
+        }
+
+        if (_show_convex_hull)
+        {
+            _point_cloud_3->Render();
         }
 
     // pops the current matrix stack, replacing the current matrix with the one below it on the stack,
@@ -194,7 +253,14 @@ void GLWidget::loadPointCloud()
         "Load point cloud", "", "Point cloud files (*.txt)");
 
     ifstream ifs(filename.toAscii().constData());
+    _point_cloud.Clear();
+    if (_polygon != NULL)
+        delete _polygon;
     ifs >> _point_cloud;
+    _show_point_cloud = true;
+    _show_model = false;
+    _show_polygon = false;
+    _show_convex_hull = false;
     repaint();
 }
 
@@ -202,5 +268,91 @@ void GLWidget::slowConvexHull()
 {
     _polygon = _point_cloud.SlowConvexHull_DirectedExtremeEdges();
     _polygon->UpdateVertexBufferObject();
+    repaint();
+}
+
+void GLWidget::quick_hull()
+{
+    _polygon = _point_cloud.QuickHull();
+    _polygon->UpdateVertexBufferObject();
+    repaint();
+}
+
+void GLWidget::fast_hull()
+{
+    _polygon = _point_cloud.FastConvexHull();
+    _polygon->UpdateVertexBufferObject();
+    repaint();
+}
+
+
+void GLWidget::load_model()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+        "Load model", "", "Object File Format files (*.off)");
+
+    if (_mesh != 0)
+    {
+        delete _mesh;
+    }
+
+    _mesh = new TriangulatedMesh3();
+    _mesh->LoadFromOFF(filename.toAscii().constData(), GL_TRUE);
+    _mesh->UpdateVertexBufferObjects();
+    emit show_volume(_mesh->CalculateSignedVolume());
+    _show_model = true;
+    _show_point_cloud = false;
+    _show_polygon = false;
+    _show_convex_hull = false;
+    repaint();
+
+}
+
+void GLWidget::load_polygon()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+        "Load polygon", "", "Text files (*.txt)");
+
+    if (!_polygon_2)
+    {
+        delete _polygon_2;
+    }
+
+    _polygon_2 = new Polygon2;
+    ifstream ifs(filename.toAscii().constData());
+    ifs >> *_polygon_2;
+    _polygon_2->UpdateVertexBufferObject();
+    _show_model = false;
+    _show_point_cloud = false;
+    _show_polygon = true;
+    _show_convex_hull = false;
+    repaint();
+}
+
+void GLWidget::load_3d()
+{
+    QString filename = QFileDialog::getOpenFileName(this,
+        "Load model", "", "Object File Format files (*.off)");
+    if (!_point_cloud_3)
+        _point_cloud_3 = new PointCloud3;
+
+    _point_cloud_3->LoadFromOFF(filename.toAscii().constData());
+
+    _show_model = false;
+    _show_point_cloud = false;
+    _show_polygon = false;
+    _show_convex_hull = true;
+    repaint();
+}
+
+void GLWidget::convex_3d()
+{
+    _point_cloud_3->ConvexHull();
+    repaint();
+}
+
+void GLWidget::step_convex()
+{
+    _point_cloud_3->SteppedConvexHull();
     repaint();
 }

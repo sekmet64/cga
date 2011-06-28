@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>269</width>
-    <height>448</height>
+    <height>546</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -223,7 +223,7 @@
      <x>10</x>
      <y>220</y>
      <width>251</width>
-     <height>131</height>
+     <height>141</height>
     </rect>
    </property>
    <property name="title">
@@ -253,6 +253,136 @@
     </property>
     <property name="text">
      <string>Slow convex hull</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="quick_hull_button">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>80</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Quick Hull</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="fast_hull_button">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>110</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Fast Hull</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="load_3d_button">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>20</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Load 3D file...</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="convex_3d_button">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>50</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Convex hull</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="step_button">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>80</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Step</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>370</y>
+     <width>251</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Models</string>
+   </property>
+   <widget class="QPushButton" name="load_model_button">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Load model...</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_4">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>430</y>
+     <width>251</width>
+     <height>80</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Make monotone</string>
+   </property>
+   <widget class="QPushButton" name="load_polygon">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>101</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Load polygon...</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_2">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>20</y>
+      <width>101</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Make monotone</string>
     </property>
    </widget>
   </widget>

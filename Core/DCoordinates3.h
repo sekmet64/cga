@@ -190,10 +190,14 @@ namespace cg
     // cross product, result is stored by *this
     inline DCoordinate3& DCoordinate3::operator ^=(const DCoordinate3& rhs)
     {
-        GLdouble d0 = _data[0], d1 = _data[1];
-        _data[0] = _data[1] * rhs._data[2] - _data[2] * rhs._data[1];
-        _data[1] = _data[2] * rhs._data[0] - d0 * rhs._data[2];
-        _data[2] = d0 * rhs._data[1] - d1 * rhs._data[0];
+        //GLdouble d0 = _data[0], d1 = _data[1];
+        //_data[0] = _data[1] * rhs._data[2] - _data[2] * rhs._data[1];
+        //_data[1] = _data[2] * rhs._data[0] - d0 * rhs._data[2];
+        //_data[2] = d0 * rhs._data[1] - d1 * rhs._data[0];
+		GLdouble s0=_data[0], s1 = _data[1], s2 = _data[2];
+        _data[0]=s1 * rhs._data[2] - s2 * rhs._data[1];
+        _data[1]=s2 * rhs._data[0] - s0 * rhs._data[2];
+        _data[2]=s0 * rhs._data[1] - s1 * rhs._data[0];
 
         return *this;
     }
@@ -233,8 +237,8 @@ namespace cg
     inline DCoordinate3& DCoordinate3::operator /=(const GLdouble& rhs)
     {
         _data[0] /= rhs;
-        _data[0] /= rhs;
-        _data[0] /= rhs;
+        _data[1] /= rhs;
+        _data[2] /= rhs;
 
         return *this;
     }

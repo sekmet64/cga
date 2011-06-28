@@ -3,6 +3,8 @@
 #include "DCoordinates2.h"
 #include <iostream>
 #include <list>
+#include <queue>
+#include <utility>
 
 namespace cg
 {
@@ -19,6 +21,16 @@ namespace cg
         public:
             Vertex2();
             Vertex2(GLdouble x, GLdouble y);
+
+            bool operator<(const Vertex2 &vertex) const
+            {
+                return (y() < vertex.y() || (y() == vertex.y() && x() < vertex.x()));
+            }
+
+            bool operator==(const Vertex2 &rhs) const
+            {
+                return x() == rhs.x() && y() == rhs.y();
+            }
         };
 
         typedef std::list<Vertex2>::iterator        vertex_iterator;
@@ -63,6 +75,8 @@ namespace cg
 
         // calculates the signed area of the simple polygon
         GLdouble CalculateSignedArea() const;
+
+        void MakeMonotone();
 
         // destructor
         virtual ~Polygon2();
