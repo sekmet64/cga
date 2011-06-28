@@ -47,4 +47,4 @@ LIBS += Dependencies/Lib/GL/glew32.lib \
 
 QT += opengl
 
-QMAKE_CXXFLAGS += -std=c++0x
+#QMAKE_CXXFLAGS += -std=c++0x

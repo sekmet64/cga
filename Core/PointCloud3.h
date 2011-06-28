@@ -2,7 +2,7 @@
 #include <vector>
 #include "DCoordinates3.h"
 #include <string>
-
+#include <set>
 #include "EdgeList/vertex3.h"
 #include "Core/EdgeList/dcedgelist.h"
 
@@ -24,6 +24,8 @@ namespace cg
 
         void Render();
 
+        void LoadTest();
+
     private:
         std::vector<Vertex3> _points;
 
@@ -32,6 +34,12 @@ namespace cg
         bool _convex_hull_done;
 
         point_iterator _pit;
-        std::list<HalfEdge*> _horizon_edges;
+        //std::list<HalfEdge*> _horizon_edges;
+
+        std::set<HalfEdge*> _horizon_edges;
+
+
+
+        std::set<Facet*> _visible_facets;
     };
 }

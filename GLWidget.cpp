@@ -89,6 +89,17 @@ void GLWidget::initializeGL()
 //    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
 
+    // test
+
+    _point_cloud_3 = new PointCloud3;
+
+    _point_cloud_3->LoadTest();
+
+    _show_model = false;
+    _show_point_cloud = false;
+    _show_polygon = false;
+    _show_convex_hull = true;
+
 }
 
 

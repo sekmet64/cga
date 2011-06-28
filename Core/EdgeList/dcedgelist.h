@@ -35,12 +35,23 @@ namespace cg
 
         std::list<HalfEdge>& GetHalfEdgeList();
 
+
+
+
+
+        std::set<Facet*> VisibleFacets(Vertex3 *p);
+        std::set<HalfEdge*> HorizonEdges(std::set<Facet*> &visible_facets);
+        std::list<Facet>& GetFacets();
+
     private:
         std::vector<Vertex3*> _vertices;
         std::list<Facet> _facets;
         std::list<HalfEdge> _half_edges;
 
         std::map<Vertex3*, std::set<Facet*> > _conflict_graph;
+
+
+
 
         typedef std::vector<Vertex3*>::iterator vertex_iterator;
         typedef std::vector<Vertex3*>::const_iterator const_vertex_iterator;

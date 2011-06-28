@@ -334,3 +334,48 @@ list<HalfEdge>& DCEdgeList::GetHalfEdgeList()
 {
     return _half_edges;
 }
+
+
+set<Facet*> DCEdgeList::VisibleFacets(Vertex3 *p)
+{
+    set<Facet*> visible_facets;
+    for (facet_iterator fit = _facets.begin(); fit != _facets.end(); ++fit)
+    {
+        if (CanSee(p, &*fit))
+        {
+            visible_facets.insert(&*fit);
+        }
+    }
+    return visible_facets;
+}
+
+set<HalfEdge*> DCEdgeList::HorizonEdges(set<Facet*> &visible_facets)
+{
+    set<HalfEdge*> horizon_edges;
+    for (set<Facet*>::iterator it = visible_facets.begin();
+         it != visible_facets.end(); ++it)
+    {
+        HalfEdge *he1 = (*it)->GetOuterComponent();
+        HalfEdge *he2 = he1->GetNext();
+        HalfEdge *he3 = he1->GetNext()->GetNext();
+
+        if (visible_facets.count(he1->GetTwin()->GetIncidentFacet()) == 0)
+        {
+            horizon_edges.insert(he1);
+        }
+        if (visible_facets.count(he2->GetTwin()->GetIncidentFacet()) == 0)
+        {
+            horizon_edges.insert(he2);
+        }
+        if (visible_facets.count(he3->GetTwin()->GetIncidentFacet()) == 0)
+        {
+            horizon_edges.insert(he3);
+        }
+    }
+    return horizon_edges;
+}
+
+std::list<Facet>& DCEdgeList::GetFacets()
+{
+    return _facets;
+}
